@@ -1,4 +1,4 @@
-package rotas
+package routes
 
 import (
 	"net/http"
