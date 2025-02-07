@@ -10,7 +10,7 @@ import (
 func main() {
 	fmt.Println("Application is running on port 5000")
 
-	r := router.Gerar()
+	r := router.Generate()
 
 	log.Fatal(http.ListenAndServe(":5000", r))
 }
