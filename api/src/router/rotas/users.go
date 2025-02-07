@@ -1,36 +1,39 @@
 package rotas
 
-import "net/http"
+import (
+	"api/src/controllers"
+	"net/http"
+)
 
 var routeUsers = []Route{
 	{
 		URI:                   "/users",
 		Method:                http.MethodPost,
-		Function:              func(w http.ResponseWriter, r *http.Request) {},
+		Function:              controllers.CreateUser,
 		RequestAuthentication: false,
 	},
 	{
 		URI:                   "/users",
 		Method:                http.MethodGet,
-		Function:              func(w http.ResponseWriter, r *http.Request) {},
+		Function:              controllers.FindAllUsers,
 		RequestAuthentication: false,
 	},
 	{
 		URI:                   "/users/{userId}",
 		Method:                http.MethodGet,
-		Function:              func(w http.ResponseWriter, r *http.Request) {},
+		Function:              controllers.FindUserById,
 		RequestAuthentication: false,
 	},
 	{
 		URI:                   "/users/{userId}",
 		Method:                http.MethodPut,
-		Function:              func(w http.ResponseWriter, r *http.Request) {},
+		Function:              controllers.UpdateUser,
 		RequestAuthentication: false,
 	},
 	{
 		URI:                   "/users/{userId}",
 		Method:                http.MethodDelete,
-		Function:              func(w http.ResponseWriter, r *http.Request) {},
+		Function:              controllers.DeleteUser,
 		RequestAuthentication: false,
 	},
 }
