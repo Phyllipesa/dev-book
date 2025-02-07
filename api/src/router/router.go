@@ -2,7 +2,7 @@ package router
 
 import "github.com/gorilla/mux"
 
-// Gerar retorna um router com as rotas configuradas
-func Gerar() *mux.Router {
+// Generate creates a new router
+func Generate() *mux.Router {
 	return mux.NewRouter()
 }
