@@ -3,6 +3,7 @@ package repository
 import (
 	"api/src/models"
 	"database/sql"
+	"fmt"
 )
 
 type users struct {
@@ -35,4 +36,39 @@ func (repository users) Create(user models.User) (uint64, error) {
 	}
 
 	return uint64(lastIDInserted), nil
+}
+
+// FindAllWithNameOrNick finds all users with a name or nick
+func (repository users) FindAllWithNameOrNick(nameOrNick string) ([]models.User, error) {
+	nameOrNick = fmt.Sprintf("%%%s%%", nameOrNick) // %nameOrNick%
+
+	lines, erro := repository.db.Query(
+		"select id, name, nick, email, created_at from users where name LIKE ? or nick LIKE ?",
+		nameOrNick, nameOrNick,
+	)
+
+	if erro != nil {
+		return nil, erro
+	}
+	defer lines.Close()
+
+	var users []models.User
+
+	for lines.Next() {
+		var user models.User
+
+		if erro = lines.Scan(
+			&user.ID,
+			&user.Name,
+			&user.Nick,
+			&user.Email,
+			&user.CreatedAt,
+		); erro != nil {
+			return nil, erro
+		}
+
+		users = append(users, user)
+	}
+
+	return users, nil
 }
