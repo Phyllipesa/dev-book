@@ -72,3 +72,31 @@ func (repository users) FindAllWithNameOrNick(nameOrNick string) ([]models.User,
 
 	return users, nil
 }
+
+// FindByID finds a user by id
+func (repository users) FindUserById(userID uint64) (models.User, error) {
+	linhas, erro := repository.db.Query(
+		"select id, name, nick, email, created_at from users where id = ?",
+		userID,
+	)
+	if erro != nil {
+		return models.User{}, erro
+	}
+	defer linhas.Close()
+
+	var user models.User
+
+	if linhas.Next() {
+		if erro = linhas.Scan(
+			&user.ID,
+			&user.Name,
+			&user.Nick,
+			&user.Email,
+			&user.CreatedAt,
+		); erro != nil {
+			return models.User{}, erro
+		}
+	}
+
+	return user, nil
+}
