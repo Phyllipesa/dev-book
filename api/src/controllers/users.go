@@ -8,7 +8,10 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
+
+	"github.com/gorilla/mux"
 )
 
 // CreateUser creates a user
@@ -79,7 +82,29 @@ func FindAllWithNameOrNick(w http.ResponseWriter, r *http.Request) {
 
 // FindUserById finds a user by id
 func FindUserById(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Find user by id"))
+	parameters := mux.Vars(r)
+
+	userID, erro := strconv.ParseUint(parameters["userId"], 10, 64)
+	if erro != nil {
+		responses.Error(w, http.StatusBadRequest, erro)
+		return
+	}
+
+	db, erro := db.Connection()
+	if erro != nil {
+		responses.Error(w, http.StatusInternalServerError, erro)
+		return
+	}
+	defer db.Close()
+
+	repository := repository.NewRepositoryUsers(db)
+	user, erro := repository.FindUserById(userID)
+	if erro != nil {
+		responses.Error(w, http.StatusInternalServerError, erro)
+		return
+	}
+
+	responses.JSON(w, http.StatusOK, user)
 }
 
 // UpdateUser updates a user
