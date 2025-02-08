@@ -4,42 +4,54 @@ import (
 	"api/src/db"
 	"api/src/models"
 	"api/src/repository"
+	"api/src/responses"
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"log"
+	"io"
 	"net/http"
 )
 
 // CreateUser creates a user
 func CreateUser(w http.ResponseWriter, r *http.Request) {
 	// request body
-	bodyRequest, erro := ioutil.ReadAll(r.Body)
+	bodyRequest, erro := io.ReadAll(r.Body)
 	if erro != nil {
-		log.Fatal(erro)
+		responses.Error(w, http.StatusUnprocessableEntity, erro)
+		return
 	}
 
 	// unmarshal request body
 	var user models.User
 	if erro = json.Unmarshal(bodyRequest, &user); erro != nil {
-		log.Fatal(erro)
+		responses.Error(w, http.StatusBadRequest, erro)
+		return
+	}
+
+	// prepare user data
+	if erro = user.Prepare(); erro != nil {
+		responses.Error(w, http.StatusBadRequest, erro)
+		return
 	}
 
 	// create a db connection
 	db, erro := db.Connection()
 	if erro != nil {
-		log.Fatal(erro)
+		responses.Error(w, http.StatusInternalServerError, erro)
+		return
 	}
+
+	// close db connection after function ends
+	defer db.Close()
 
 	// passing db connection to repository
 	repository := repository.NewRepositoryUsers(db)
-	userID, erro := repository.Create(user)
+	user.ID, erro = repository.Create(user)
 
 	if erro != nil {
-		log.Fatal(erro)
+		responses.Error(w, http.StatusInternalServerError, erro)
+		return
 	}
 
-	w.Write([]byte(fmt.Sprintf("User created with id %d", userID)))
+	responses.JSON(w, http.StatusCreated, user)
 }
 
 // FindAllUsers finds all users
