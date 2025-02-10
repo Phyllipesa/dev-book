@@ -15,6 +15,9 @@ var (
 
 	// Port is the port where the application will run
 	Port = 0
+
+	// SecretKey is the key that will be used to signed the token
+	SecretKey []byte
 )
 
 // ToLoad loads the application configuration
@@ -38,4 +41,6 @@ func ToLoad() {
 		os.Getenv("DB_PORT"),     // Porta do banco (3306)
 		os.Getenv("DB_NAME"),     // Nome do banco
 	)
+
+	SecretKey = []byte(os.Getenv("SECRET_KEY"))
 }
