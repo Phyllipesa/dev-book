@@ -74,10 +74,10 @@ func (repository users) FindAllWithNameOrNick(nameOrNick string) ([]models.User,
 }
 
 // FindByID finds a user by id
-func (repository users) FindUserById(userID uint64) (models.User, error) {
+func (repository users) FindUserById(ID uint64) (models.User, error) {
 	linhas, erro := repository.db.Query(
 		"select id, name, nick, email, created_at from users where id = ?",
-		userID,
+		ID,
 	)
 	if erro != nil {
 		return models.User{}, erro
@@ -99,4 +99,21 @@ func (repository users) FindUserById(userID uint64) (models.User, error) {
 	}
 
 	return user, nil
+}
+
+// Update updates a user in the database
+func (repository users) UpdateUser(ID uint64, user models.User) error {
+	statement, erro := repository.db.Prepare(
+		"update users set name = ?, nick = ?, email = ? where id = ?",
+	)
+	if erro != nil {
+		return erro
+	}
+	defer statement.Close()
+
+	if _, erro = statement.Exec(user.Name, user.Nick, user.Email, ID); erro != nil {
+		return erro
+	}
+
+	return nil
 }
