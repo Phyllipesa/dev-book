@@ -59,7 +59,7 @@ func ExtractUserID(r *http.Request) (uint64, error) {
 			ao ParseUint.
 		*/
 		userID, erro := strconv.ParseUint(
-			fmt.Sprintf("%.0f", permissions["userId"]), 10, 64,
+			fmt.Sprintf("%.0f", permissions["userID"]), 10, 64,
 		)
 		if erro != nil {
 			return 0, erro
