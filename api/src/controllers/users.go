@@ -1,11 +1,13 @@
 package controllers
 
 import (
+	"api/src/authentication"
 	"api/src/db"
 	"api/src/models"
 	"api/src/repository"
 	"api/src/responses"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"strconv"
@@ -110,10 +112,20 @@ func FindUserById(w http.ResponseWriter, r *http.Request) {
 // UpdateUser updates a user
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	parameters := mux.Vars(r)
-
 	userID, erro := strconv.ParseUint(parameters["userId"], 10, 64)
 	if erro != nil {
 		responses.Error(w, http.StatusBadRequest, erro)
+		return
+	}
+
+	userIdFromToken, erro := authentication.ExtractUserID(r)
+	if erro != nil {
+		responses.Error(w, http.StatusUnauthorized, erro)
+		return
+	}
+
+	if userID != userIdFromToken {
+		responses.Error(w, http.StatusForbidden, errors.New("you don't have permission to update another users"))
 		return
 	}
 
