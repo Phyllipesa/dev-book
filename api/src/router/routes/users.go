@@ -28,7 +28,7 @@ var routeUsers = []Route{
 		URI:                   "/users/{userId}",
 		Method:                http.MethodPut,
 		Function:              controllers.UpdateUser,
-		RequestAuthentication: false,
+		RequestAuthentication: true,
 	},
 	{
 		URI:                   "/users/{userId}",
