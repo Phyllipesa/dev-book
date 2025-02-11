@@ -2,6 +2,7 @@ package authentication
 
 import (
 	"api/src/config"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -18,6 +19,21 @@ func CreateToken(userID uint64) (string, error) {
 	permissions["userID"] = userID
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, permissions)
 	return token.SignedString([]byte(config.SecretKey)) // secret
+}
+
+// ValidationToken verify if token in request is valid
+func ValidationToken(r *http.Request) error {
+	tokenString := extractToken(r)
+	token, erro := jwt.Parse(tokenString, returnVerificationKey)
+	if erro != nil {
+		return erro
+	}
+
+	if _, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return nil
+	}
+
+	return errors.New("invalid token")
 }
 
 // extractToken if token in correct format, extract from request and return
