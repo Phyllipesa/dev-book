@@ -16,7 +16,7 @@ var routeUsers = []Route{
 		URI:                   "/users",
 		Method:                http.MethodGet,
 		Function:              controllers.FindAllWithNameOrNick,
-		RequestAuthentication: false,
+		RequestAuthentication: true,
 	},
 	{
 		URI:                   "/users/{userId}",
@@ -34,6 +34,6 @@ var routeUsers = []Route{
 		URI:                   "/users/{userId}",
 		Method:                http.MethodDelete,
 		Function:              controllers.DeleteUser,
-		RequestAuthentication: false,
+		RequestAuthentication: true,
 	},
 }
