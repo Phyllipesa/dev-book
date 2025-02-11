@@ -22,7 +22,7 @@ var routeUsers = []Route{
 		URI:                   "/users/{userId}",
 		Method:                http.MethodGet,
 		Function:              controllers.FindUserById,
-		RequestAuthentication: false,
+		RequestAuthentication: true,
 	},
 	{
 		URI:                   "/users/{userId}",
