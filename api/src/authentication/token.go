@@ -2,6 +2,7 @@ package authentication
 
 import (
 	"api/src/config"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -28,4 +29,13 @@ func extractToken(r *http.Request) string {
 	}
 
 	return ""
+}
+
+// returnVerificationKey verify if signature method is correct
+func returnVerificationKey(token *jwt.Token) (interface{}, error) {
+	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+		return nil, fmt.Errorf("unexpected signature method! %v", token.Header["alg"])
+	}
+
+	return config.SecretKey, nil
 }
