@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -34,6 +35,40 @@ func ValidationToken(r *http.Request) error {
 	}
 
 	return errors.New("invalid token")
+}
+
+// ExtractUserID return userID from token
+func ExtractUserID(r *http.Request) (uint64, error) {
+	tokenString := extractToken(r)
+	token, erro := jwt.Parse(tokenString, returnVerificationKey)
+	if erro != nil {
+		return 0, erro
+	}
+
+	if permissions, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		/*
+			No caso o primeiro parâmetro que o ParseUint recebe é uma string,
+			porém o que esta retornando do permissions é uma interface.
+
+			Então, é preciso converter o valor para string para depois
+			converte-lo a um uint.
+
+			OBS: A funçao CreateToken recebe um "userID uint64" no parâmetro,
+			porém por padrão ele ficara salvo como um Float.
+			Então, é preciso converter de Float para String e então passa-la
+			ao ParseUint.
+		*/
+		userID, erro := strconv.ParseUint(
+			fmt.Sprintf("%.0f", permissions["userId"]), 10, 64,
+		)
+		if erro != nil {
+			return 0, erro
+		}
+
+		return userID, nil
+	}
+
+	return 0, errors.New("invalid token")
 }
 
 // extractToken if token in correct format, extract from request and return
