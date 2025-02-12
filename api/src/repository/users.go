@@ -75,19 +75,19 @@ func (repository users) FindAllWithNameOrNick(nameOrNick string) ([]models.User,
 
 // FindByID finds a user by id
 func (repository users) FindUserById(ID uint64) (models.User, error) {
-	linhas, erro := repository.db.Query(
+	lines, erro := repository.db.Query(
 		"select id, name, nick, email, created_at from users where id = ?",
 		ID,
 	)
 	if erro != nil {
 		return models.User{}, erro
 	}
-	defer linhas.Close()
+	defer lines.Close()
 
 	var user models.User
 
-	if linhas.Next() {
-		if erro = linhas.Scan(
+	if lines.Next() {
+		if erro = lines.Scan(
 			&user.ID,
 			&user.Name,
 			&user.Nick,
@@ -187,4 +187,37 @@ func (repository users) UnfollowUser(userID, followerID uint64) error {
 	}
 
 	return nil
+}
+
+// FindFollowers find all followers of a user
+func (repository users) FindFollowers(userID uint64) ([]models.User, error) {
+	lines, erro := repository.db.Query(
+		`select u.id, u.name, u.nick, u.email, u.created_at from users u
+		inner join followers s on u.id = s.follower_id where s.user_id = ?`,
+		userID,
+	)
+	if erro != nil {
+		return nil, erro
+	}
+	defer lines.Close()
+
+	var followers []models.User
+
+	for lines.Next() {
+		var follower models.User
+
+		if erro = lines.Scan(
+			&follower.ID,
+			&follower.Name,
+			&follower.Nick,
+			&follower.Email,
+			&follower.CreatedAt,
+		); erro != nil {
+			return nil, erro
+		}
+
+		followers = append(followers, follower)
+	}
+
+	return followers, nil
 }
