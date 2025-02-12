@@ -6,6 +6,7 @@ import (
 	"api/src/models"
 	"api/src/repository"
 	"api/src/responses"
+	"api/src/security"
 	"encoding/json"
 	"errors"
 	"io"
@@ -125,7 +126,9 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if userID != userIdFromToken {
-		responses.Error(w, http.StatusForbidden, errors.New("you don't have permission to update another users"))
+		responses.Error(w, http.StatusForbidden, errors.New(
+			"you don't have permission to update another users"),
+		)
 		return
 	}
 
@@ -179,7 +182,9 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if userID != userIdFromToken {
-		responses.Error(w, http.StatusForbidden, errors.New("you don't have permission to delete another users"))
+		responses.Error(w, http.StatusForbidden, errors.New(
+			"you don't have permission to delete another users"),
+		)
 		return
 	}
 
@@ -215,7 +220,9 @@ func FollowUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if followerId == userID {
-		responses.Error(w, http.StatusForbidden, errors.New("invalid action: you cannot follow yourself"))
+		responses.Error(w, http.StatusForbidden, errors.New(
+			"invalid action: you cannot follow yourself"),
+		)
 		return
 	}
 
@@ -251,7 +258,9 @@ func UnfollowUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if followerID == userID {
-		responses.Error(w, http.StatusForbidden, errors.New("invalid action: you cannot unfollow yourself"))
+		responses.Error(w, http.StatusForbidden, errors.New(
+			"invalid action: you cannot unfollow yourself"),
+		)
 		return
 	}
 
@@ -321,4 +330,77 @@ func FindFollowing(w http.ResponseWriter, r *http.Request) {
 	}
 
 	responses.JSON(w, http.StatusOK, following)
+}
+
+// UpdatePassword update a user's password
+func UpdatePassword(w http.ResponseWriter, r *http.Request) {
+	userIdFromToken, erro := authentication.ExtractUserID(r)
+	if erro != nil {
+		responses.Error(w, http.StatusUnauthorized, erro)
+		return
+	}
+
+	parameters := mux.Vars(r)
+	userID, erro := strconv.ParseUint(parameters["userId"], 10, 64)
+	if erro != nil {
+		responses.Error(w, http.StatusBadRequest, erro)
+		return
+	}
+
+	if userIdFromToken != userID {
+		responses.Error(w, http.StatusForbidden, errors.New(
+			"invalid action! You can't update another account's password"),
+		)
+		return
+	}
+
+	requestBody, erro := io.ReadAll(r.Body)
+	if erro != nil {
+		responses.Error(w, http.StatusUnprocessableEntity, erro)
+		return
+	}
+
+	var password models.Password
+	if erro = json.Unmarshal(requestBody, &password); erro != nil {
+		responses.Error(w, http.StatusBadRequest, erro)
+		return
+	}
+
+	db, erro := db.Connection()
+	if erro != nil {
+		responses.Error(w, http.StatusInternalServerError, erro)
+		return
+	}
+	defer db.Close()
+
+	repository := repository.NewRepositoryUsers(db)
+	savedPassword, erro := repository.FindPassword(userID)
+	if erro != nil {
+		responses.Error(w, http.StatusInternalServerError, erro)
+		return
+	}
+
+	if erro = security.VerifyPassword(
+		savedPassword,
+		password.CurrentPassword,
+	); erro != nil {
+		responses.Error(
+			w,
+			http.StatusInternalServerError,
+			errors.New("invalid password"))
+		return
+	}
+
+	newPasswordWithHash, erro := security.Hash(password.NewPassword)
+	if erro != nil {
+		responses.Error(w, http.StatusBadRequest, erro)
+		return
+	}
+
+	if erro = repository.UpdatePassword(userID, string(newPasswordWithHash)); erro != nil {
+		responses.Error(w, http.StatusInternalServerError, erro)
+		return
+	}
+
+	responses.JSON(w, http.StatusNoContent, nil)
 }
