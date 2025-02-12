@@ -59,8 +59,28 @@ func CreatePublication(w http.ResponseWriter, r *http.Request) {
 }
 
 // FindPublication find publications that would appear in the user's feed
-func FindPublication(w http.ResponseWriter, r *http.Request) {
+func FindPublications(w http.ResponseWriter, r *http.Request) {
+	userIdFromToken, erro := authentication.ExtractUserID(r)
+	if erro != nil {
+		responses.Error(w, http.StatusUnauthorized, erro)
+		return
+	}
 
+	db, erro := db.Connection()
+	if erro != nil {
+		responses.Error(w, http.StatusInternalServerError, erro)
+		return
+	}
+	defer db.Close()
+
+	repository := repository.NewRepositoryPublications(db)
+	publications, erro := repository.FindPublications(userIdFromToken)
+	if erro != nil {
+		responses.Error(w, http.StatusInternalServerError, erro)
+		return
+	}
+
+	responses.JSON(w, http.StatusCreated, publications)
 }
 
 // FindPublicationById find a publication
