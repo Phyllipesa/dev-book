@@ -32,7 +32,7 @@ func (user *User) Prepare(stage string) error {
 	return nil
 }
 
-// Validate validates the user data
+// Validate validates user data
 func (user *User) validation(stage string) error {
 	if user.Name == "" {
 		return errors.New("name is required")
@@ -57,7 +57,7 @@ func (user *User) validation(stage string) error {
 	return nil
 }
 
-// format trims the user data
+// format trims in user data
 func (user *User) format(stage string) error {
 	user.Name = strings.TrimSpace(user.Name)
 	user.Nick = strings.TrimSpace(user.Nick)
