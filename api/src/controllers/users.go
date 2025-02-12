@@ -132,14 +132,14 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	corpoRequisição, erro := io.ReadAll(r.Body)
+	bodyRequest, erro := io.ReadAll(r.Body)
 	if erro != nil {
 		responses.Error(w, http.StatusUnprocessableEntity, erro)
 		return
 	}
 
 	var user models.User
-	if erro = json.Unmarshal(corpoRequisição, &user); erro != nil {
+	if erro = json.Unmarshal(bodyRequest, &user); erro != nil {
 		responses.Error(w, http.StatusBadRequest, erro)
 		return
 	}
