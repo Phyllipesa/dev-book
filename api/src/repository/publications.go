@@ -70,3 +70,40 @@ func (repository publications) FindById(publicationID uint64) (models.Publicatio
 
 	return publication, nil
 }
+
+// FindPublication find publications that would appear in the user's feed
+func (repository publications) FindPublications(userID uint64) ([]models.Publication, error) {
+	lines, erro := repository.db.Query(`
+		select distinct p.*, u.nick from publications p 
+		inner join users u on u.id = p.author_id 
+		inner join followers s on p.author_id = s.user_id
+		where u.id = ? or s.follower_id = ?`,
+		userID,
+		userID,
+	)
+	if erro != nil {
+		return nil, erro
+	}
+	defer lines.Close()
+
+	var publications []models.Publication
+
+	for lines.Next() {
+		var publication models.Publication
+		if erro = lines.Scan(
+			&publication.ID,
+			&publication.Title,
+			&publication.Content,
+			&publication.AuthorID,
+			&publication.Likes,
+			&publication.CreatedAt,
+			&publication.AuthorNick,
+		); erro != nil {
+			return nil, erro
+		}
+
+		publications = append(publications, publication)
+	}
+
+	return publications, nil
+}
