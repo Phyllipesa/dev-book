@@ -15,7 +15,7 @@ func NewRepositoryUsers(db *sql.DB) *users {
 	return &users{db}
 }
 
-// Create inserts a user in the database
+// Create inserts a user in database
 func (repository users) Create(user models.User) (uint64, error) {
 	statement, erro := repository.db.Prepare(
 		"insert into users (name, nick, email, password) values (?, ?, ?, ?)",
@@ -25,12 +25,12 @@ func (repository users) Create(user models.User) (uint64, error) {
 	}
 	defer statement.Close()
 
-	resultado, erro := statement.Exec(user.Name, user.Nick, user.Email, user.Password)
+	result, erro := statement.Exec(user.Name, user.Nick, user.Email, user.Password)
 	if erro != nil {
 		return 0, erro
 	}
 
-	lastIDInserted, erro := resultado.LastInsertId()
+	lastIDInserted, erro := result.LastInsertId()
 	if erro != nil {
 		return 0, erro
 	}
