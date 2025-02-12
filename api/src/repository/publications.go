@@ -107,3 +107,20 @@ func (repository publications) FindPublications(userID uint64) ([]models.Publica
 
 	return publications, nil
 }
+
+// UpdatePublication update a publication
+func (repository publications) Update(publicationID uint64, publication models.Publication) error {
+	statement, erro := repository.db.Prepare(
+		"update publications set title = ?, content = ? where id = ?",
+	)
+	if erro != nil {
+		return erro
+	}
+	defer statement.Close()
+
+	if _, erro = statement.Exec(publication.Title, publication.Content, publicationID); erro != nil {
+		return erro
+	}
+
+	return nil
+}
