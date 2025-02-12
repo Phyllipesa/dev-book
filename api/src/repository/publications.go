@@ -38,3 +38,35 @@ func (repository publications) Create(publication models.Publication) (uint64, e
 
 	return uint64(lastIdInserted), nil
 }
+
+// FindById finds publication by id
+func (repository publications) FindById(publicationID uint64) (models.Publication, error) {
+	lines, erro := repository.db.Query(`
+		select p.*, u.nick from publications p
+		inner join users u
+		on u.id = p.author_id where p.id = ?`,
+		publicationID,
+	)
+	if erro != nil {
+		return models.Publication{}, erro
+	}
+	defer lines.Close()
+
+	var publication models.Publication
+
+	if lines.Next() {
+		if erro = lines.Scan(
+			&publication.ID,
+			&publication.Title,
+			&publication.Content,
+			&publication.AuthorID,
+			&publication.Likes,
+			&publication.CreatedAt,
+			&publication.AuthorNick,
+		); erro != nil {
+			return models.Publication{}, erro
+		}
+	}
+
+	return publication, nil
+}
