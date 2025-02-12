@@ -9,6 +9,9 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 // CreatePublication add a publication in database
@@ -62,7 +65,28 @@ func FindPublication(w http.ResponseWriter, r *http.Request) {
 
 // FindPublicationById find a publication
 func FindPublicationById(w http.ResponseWriter, r *http.Request) {
+	parameters := mux.Vars(r)
+	publicationId, erro := strconv.ParseUint(parameters["publicationId"], 10, 64)
+	if erro != nil {
+		responses.Error(w, http.StatusBadRequest, erro)
+		return
+	}
 
+	db, erro := db.Connection()
+	if erro != nil {
+		responses.Error(w, http.StatusInternalServerError, erro)
+		return
+	}
+	defer db.Close()
+
+	repository := repository.NewRepositoryPublications(db)
+	publication, erro := repository.FindById(publicationId)
+	if erro != nil {
+		responses.Error(w, http.StatusInternalServerError, erro)
+		return
+	}
+
+	responses.JSON(w, http.StatusOK, publication)
 }
 
 // UpdatePublication update a publication
