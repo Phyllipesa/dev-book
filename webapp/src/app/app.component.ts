@@ -4,7 +4,11 @@ import { AngularMaterialModule } from './angular-material/angular-material.modul
 
 @Component({
     selector: 'app-root',
-    imports: [RouterOutlet, AngularMaterialModule],
+    // eslint-disable-next-line prettier/prettier
+    imports: [
+        RouterOutlet,
+        AngularMaterialModule,
+    ],
     templateUrl: './app.component.html',
     styleUrl: './app.component.scss',
 })
