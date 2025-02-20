@@ -1,6 +1,8 @@
+import { Router } from '@angular/router';
 import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+
+import { LoginService } from '../../services/login.service';
 
 @Component({
     selector: 'app-login',
@@ -16,6 +18,17 @@ export class LoginComponent {
     });
 
     private readonly _router = inject(Router);
+    private readonly _loginService = inject(LoginService);
 
-    onLogin(): void {}
+    onLogin(): void {
+        this._loginService
+            .login(this.loginForm.value.email, this.loginForm.value.password)
+            .subscribe({
+                next: (tokenResponse) => {
+                    console.log('TOKEN', tokenResponse);
+                    this._router.navigate(['criar-usuario']);
+                },
+                error: () => {},
+            });
+    }
 }
