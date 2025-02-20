@@ -1,1 +1,36 @@
-<p>register-form works!</p>
+<div class="user-infos">
+    <div class="user-infos__container">
+        <form [formGroup]="registerForm">
+            <div class="user-infos__title">
+                <h1 class="poppins-semibold">Crie sua conta no DevBook!</h1>
+            </div>
+            <div class="user-infos__row">
+                <div class="user-infos__fields">
+                    <p class="poppins-regular">Nome:</p>
+                    <input class="poppins-regular" placeholder="Digite o seu nome" formControlName="name" />
+                </div>
+                <div class="user-infos__fields">
+                    <p class="poppins-regular">Email:</p>
+                    <input class="poppins-regular" placeholder="Digite o seu email" formControlName="email" />
+                </div>
+                <div class="user-infos__fields">
+                    <p class="poppins-regular">Nick:</p>
+                    <input class="poppins-regular" placeholder="Digite seu nick" formControlName="nick" />
+                </div>
+                <div class="user-infos__fields">
+                    <p class="poppins-regular">Senha:</p>
+                    <input class="poppins-regular" placeholder="Digite a sua senha" formControlName="password" />
+                </div>
+                <div class="user-infos__fields">
+                    <p class="poppins-regular">Confirmar senha:</p>
+                    <input class="poppins-regular" placeholder="Confirme a sua senha" formControlName="password" />
+                </div>
+
+                <a class="poppins-light" href="/">Clique aqui fazer o Login</a>
+            </div>
+            <div>
+                <button type="button" class="poppins-regular user-infos__send-button">Criar Usuário</button>
+            </div>
+        </form>
+    </div>
+</div>
